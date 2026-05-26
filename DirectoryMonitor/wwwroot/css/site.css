@@ -1,30 +1,83 @@
 /* =============================================
-   Directory Monitor — Custom Stylesheet
-   Bootstrap 5 dark-mode aware design
+   Directory Monitor - Custom Stylesheet
+   Manual dark mode (Bootstrap 5.1 compatible)
+   Toggle via class "dm-dark" on <html>
    ============================================= */
 
-/* ---------- Base ---------- */
+/* ---------- Design tokens - Light mode ---------- */
 :root {
     --dm-radius: 0.75rem;
-    --dm-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
-    --dm-shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.12);
     --dm-transition: 0.2s ease;
-    --dm-added: #198754;
-    --dm-added-bg: #d1e7dd;
-    --dm-modified: #fd7e14;
-    --dm-modified-bg: #ffe5d0;
-    --dm-deleted: #dc3545;
-    --dm-deleted-bg: #f8d7da;
+    --dm-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+    --dm-shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.13);
+
+    /* surfaces */
+    --dm-bg:           #f8f9fa;
+    --dm-surface:      #ffffff;
+    --dm-surface-alt:  #f1f3f5;
+    --dm-border:       #dee2e6;
+
+    /* text */
+    --dm-text:         #212529;
+    --dm-text-muted:   #6c757d;
+
+    /* nav */
+    --dm-nav-bg:       #ffffff;
+    --dm-nav-border:   #dee2e6;
+
+    /* status colors */
+    --dm-added:        #198754;
+    --dm-added-bg:     #d1e7dd;
+    --dm-added-border: #a3cfbb;
+
+    --dm-modified:        #c96000;
+    --dm-modified-bg:     #ffe5cc;
+    --dm-modified-border: #ffb366;
+
+    --dm-deleted:        #b02a37;
+    --dm-deleted-bg:     #f8d7da;
+    --dm-deleted-border: #f1aeb5;
+
+    /* inputs */
+    --dm-input-bg:     #ffffff;
+    --dm-input-border: #ced4da;
+    --dm-input-text:   #212529;
 }
 
-[data-bs-theme="dark"] {
-    --dm-added-bg: #0d3321;
-    --dm-modified-bg: #3d1f00;
-    --dm-deleted-bg: #2c0b0e;
-    --dm-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-    --dm-shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.5);
+/* ---------- Design tokens - Dark mode ---------- */
+html.dm-dark {
+    --dm-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --dm-shadow-hover: 0 6px 28px rgba(0, 0, 0, 0.55);
+
+    --dm-bg:           #0d1117;
+    --dm-surface:      #161b22;
+    --dm-surface-alt:  #21262d;
+    --dm-border:       #30363d;
+
+    --dm-text:         #e6edf3;
+    --dm-text-muted:   #8b949e;
+
+    --dm-nav-bg:       #161b22;
+    --dm-nav-border:   #30363d;
+
+    --dm-added:        #3fb950;
+    --dm-added-bg:     #0d2e1a;
+    --dm-added-border: #1a6632;
+
+    --dm-modified:        #e3973e;
+    --dm-modified-bg:     #2d1a00;
+    --dm-modified-border: #7a4200;
+
+    --dm-deleted:        #f85149;
+    --dm-deleted-bg:     #2d0f0d;
+    --dm-deleted-border: #7a1e1a;
+
+    --dm-input-bg:     #0d1117;
+    --dm-input-border: #30363d;
+    --dm-input-text:   #e6edf3;
 }
 
+/* ---------- Base ---------- */
 html, body {
     height: 100%;
     font-size: 15px;
@@ -33,63 +86,62 @@ html, body {
 body {
     display: flex;
     flex-direction: column;
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--dm-bg);
+    color: var(--dm-text);
     transition: background-color var(--dm-transition), color var(--dm-transition);
 }
 
-main {
-    flex: 1;
-}
+main { flex: 1; }
 
 /* ---------- Navbar ---------- */
 .dm-navbar {
-    background-color: var(--bs-body-bg);
-    border-bottom: 1px solid var(--bs-border-color);
+    background-color: var(--dm-nav-bg);
+    border-bottom: 1px solid var(--dm-nav-border);
     padding: 0.875rem 0;
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
 }
 
 .dm-navbar .navbar-brand {
     font-weight: 700;
     font-size: 1.1rem;
     letter-spacing: -0.01em;
-    color: var(--bs-body-color);
+    color: var(--dm-text);
     text-decoration: none;
 }
 
 .dm-navbar .navbar-brand svg {
-    opacity: 0.75;
+    opacity: 0.65;
 }
 
+/* ---------- Dark mode toggle button ---------- */
 .dm-theme-toggle {
-    background: none;
-    border: 1px solid var(--bs-border-color);
+    background: var(--dm-surface);
+    border: 1px solid var(--dm-border);
     border-radius: 0.5rem;
-    padding: 0.3rem 0.55rem;
-    font-size: 0.9rem;
+    padding: 0.35rem 0.6rem;
     line-height: 1;
     cursor: pointer;
-    transition: border-color var(--dm-transition), background-color var(--dm-transition);
+    color: var(--dm-text);
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
 }
 
 .dm-theme-toggle:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--dm-surface-alt);
 }
 
 /* ---------- Page header ---------- */
-.dm-page-header {
-    margin-bottom: 2.5rem;
-}
+.dm-page-header { margin-bottom: 2.5rem; }
 
 .dm-page-title {
     font-size: 2rem;
     font-weight: 700;
     letter-spacing: -0.03em;
     margin-bottom: 0.35rem;
+    color: var(--dm-text);
 }
 
 .dm-page-subtitle {
-    color: var(--bs-secondary-color);
+    color: var(--dm-text-muted);
     font-size: 1rem;
     margin: 0;
 }
@@ -97,12 +149,16 @@ main {
 /* ---------- Input card ---------- */
 .dm-input-card {
     border-radius: var(--dm-radius);
-    border: 1px solid var(--bs-border-color);
-    background-color: var(--bs-body-bg);
+    border: 1px solid var(--dm-border);
+    background-color: var(--dm-surface);
     box-shadow: var(--dm-shadow);
     padding: 1.75rem;
     margin-bottom: 2rem;
-    transition: box-shadow var(--dm-transition);
+    transition: background-color var(--dm-transition), border-color var(--dm-transition), box-shadow var(--dm-transition);
+}
+
+.dm-input-card label {
+    color: var(--dm-text);
 }
 
 .dm-path-input {
@@ -110,17 +166,21 @@ main {
     font-size: 0.9rem;
     padding: 0.65rem 1rem;
     border-radius: 0.5rem;
-    border: 1px solid var(--bs-border-color);
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
-    transition: border-color var(--dm-transition), box-shadow var(--dm-transition);
+    border: 1px solid var(--dm-input-border);
+    background-color: var(--dm-input-bg);
+    color: var(--dm-input-text);
+    width: 100%;
+    transition: border-color var(--dm-transition), box-shadow var(--dm-transition),
+                background-color var(--dm-transition), color var(--dm-transition);
 }
 
 .dm-path-input:focus {
     border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
     outline: none;
 }
+
+.dm-path-input::placeholder { color: var(--dm-text-muted); }
 
 .dm-analyze-btn {
     padding: 0.65rem 1.5rem;
@@ -132,16 +192,34 @@ main {
 
 .dm-analyze-btn:not(:disabled):hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
+    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.35);
 }
 
-.dm-analyze-btn:disabled {
-    opacity: 0.75;
-}
+.dm-analyze-btn:disabled { opacity: 0.75; }
 
 /* ---------- Spinner ---------- */
-.dm-spinner {
-    display: none;
+.dm-spinner { display: none; }
+
+/* ---------- Result meta bar ---------- */
+.dm-result-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--dm-radius);
+    background-color: var(--dm-surface);
+    border: 1px solid var(--dm-border);
+    font-size: 0.875rem;
+    color: var(--dm-text-muted);
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
+}
+
+.dm-result-meta strong {
+    color: var(--dm-text);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.8rem;
 }
 
 /* ---------- Summary cards ---------- */
@@ -153,9 +231,7 @@ main {
 }
 
 @media (max-width: 576px) {
-    .dm-summary-grid {
-        grid-template-columns: 1fr;
-    }
+    .dm-summary-grid { grid-template-columns: 1fr; }
 }
 
 .dm-summary-card {
@@ -166,7 +242,8 @@ main {
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: box-shadow var(--dm-transition), transform var(--dm-transition);
+    transition: box-shadow var(--dm-transition), transform var(--dm-transition),
+                background-color var(--dm-transition), border-color var(--dm-transition);
     animation: dm-fade-in 0.35s ease both;
 }
 
@@ -177,19 +254,19 @@ main {
 
 .dm-summary-card--added {
     background-color: var(--dm-added-bg);
-    border-color: var(--dm-added);
+    border-color: var(--dm-added-border);
     color: var(--dm-added);
 }
 
 .dm-summary-card--modified {
     background-color: var(--dm-modified-bg);
-    border-color: var(--dm-modified);
+    border-color: var(--dm-modified-border);
     color: var(--dm-modified);
 }
 
 .dm-summary-card--deleted {
     background-color: var(--dm-deleted-bg);
-    border-color: var(--dm-deleted);
+    border-color: var(--dm-deleted-border);
     color: var(--dm-deleted);
 }
 
@@ -214,27 +291,6 @@ main {
     opacity: 0.85;
 }
 
-/* ---------- Result meta bar ---------- */
-.dm-result-meta {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 0.85rem 1.25rem;
-    border-radius: var(--dm-radius);
-    background-color: var(--bs-secondary-bg);
-    border: 1px solid var(--bs-border-color);
-    font-size: 0.875rem;
-    color: var(--bs-secondary-color);
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.dm-result-meta strong {
-    color: var(--bs-body-color);
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 0.8rem;
-}
-
 /* ---------- Change groups ---------- */
 .dm-change-group {
     margin-bottom: 1.5rem;
@@ -252,29 +308,146 @@ main {
     cursor: pointer;
     user-select: none;
     border: 1px solid transparent;
-    transition: background-color var(--dm-transition);
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
 }
 
 .dm-group-header--added {
     background-color: var(--dm-added-bg);
-    border-color: var(--dm-added);
+    border-color: var(--dm-added-border);
     color: var(--dm-added);
 }
 
 .dm-group-header--modified {
     background-color: var(--dm-modified-bg);
-    border-color: var(--dm-modified);
+    border-color: var(--dm-modified-border);
     color: var(--dm-modified);
 }
 
 .dm-group-header--deleted {
     background-color: var(--dm-deleted-bg);
-    border-color: var(--dm-deleted);
+    border-color: var(--dm-deleted-border);
     color: var(--dm-deleted);
 }
 
 .dm-group-count {
     margin-left: auto;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+html.dm-dark .dm-group-count {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.dm-group-chevron {
+    margin-left: 0.25rem;
+    flex-shrink: 0;
+    transition: transform var(--dm-transition);
+}
+
+.dm-group-header.collapsed .dm-group-chevron {
+    transform: rotate(-90deg);
+}
+
+/* ---------- File list ---------- */
+.dm-file-list {
+    border: 1px solid var(--dm-border);
+    border-top: none;
+    border-radius: 0 0 var(--dm-radius) var(--dm-radius);
+    overflow: hidden;
+    transition: border-color var(--dm-transition);
+}
+
+.dm-file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--dm-border);
+    background-color: var(--dm-surface);
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
+}
+
+.dm-file-item:last-child { border-bottom: none; }
+
+.dm-file-item:hover { background-color: var(--dm-surface-alt); }
+
+.dm-file-icon {
+    flex-shrink: 0;
+    opacity: 0.55;
+    color: var(--dm-text-muted);
+}
+
+.dm-file-path {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.82rem;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--dm-text);
+}
+
+.dm-file-version {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background-color: var(--dm-surface-alt);
+    color: var(--dm-text-muted);
+    border: 1px solid var(--dm-border);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color var(--dm-transition), color var(--dm-transition), border-color var(--dm-transition);
+}
+
+/* ---------- No-changes banner ---------- */
+.dm-no-changes {
+    border-radius: var(--dm-radius);
+    padding: 1.5rem 2rem;
+    background-color: var(--dm-added-bg);
+    border: 1px solid var(--dm-added-border);
+    color: var(--dm-added);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: dm-fade-in 0.35s ease both;
+    transition: background-color var(--dm-transition), border-color var(--dm-transition);
+}
+
+/* ---------- Error alert ---------- */
+.dm-error {
+    border-radius: var(--dm-radius);
+    animation: dm-fade-in 0.3s ease both;
+    background-color: var(--dm-deleted-bg);
+    border: 1px solid var(--dm-deleted-border);
+    color: var(--dm-deleted);
+    padding: 1rem 1.25rem;
+}
+
+/* ---------- Footer ---------- */
+.dm-footer {
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--dm-border);
+    margin-top: auto;
+    transition: border-color var(--dm-transition);
+}
+
+.dm-footer small {
+    color: var(--dm-text-muted);
+}
+
+/* ---------- Animations ---------- */
+@keyframes dm-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
     font-size: 0.78rem;
     font-weight: 700;
     padding: 0.15rem 0.55rem;

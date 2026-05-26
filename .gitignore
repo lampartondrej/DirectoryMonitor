@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# DirectoryMonitor — runtime-generated snapshot files must never be committed
+**/App_Data/Snapshots/
