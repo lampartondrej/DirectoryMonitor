@@ -1,156 +1,181 @@
 # Directory Monitor
 
-An ASP.NET Core MVC application that analyzes local directories, detects file changes, versions files, and persists snapshots — built as a technical interview assignment demonstrating **Clean Architecture** principles.
+Directory Monitor is an ASP.NET Core MVC application that analyzes local directories, detects file changes, tracks file versions, and persists directory snapshots without using a database.
+
+The project was created as a technical interview assignment with focus on:
+
+* Clean Architecture
+* separation of concerns
+* maintainability
+* testability
+* and pragmatic backend-oriented design
 
 ---
 
-## Architecture Overview
+# Features
 
-```
-????????????????????????????????????????????????????????
-?                  DirectoryMonitor.Web                ?
-?           Controllers  ·  Views  ·  Middleware       ?
-????????????????????????????????????????????????????????
-                      ? depends on
-????????????????????????????????????????????????????????
-?              DirectoryMonitor.Application            ?
-?    Interfaces  ·  Services  ·  Models                ?
-????????????????????????????????????????????????????????
-           ?                       ?
-           ? depends on            ? depends on
-????????????????????????  ?????????????????????????????
-?  DirectoryMonitor    ?  ?  DirectoryMonitor          ?
-?  .Domain             ?  ?  .Infrastructure           ?
-?  Entities only       ?  ?  FileScanner · Hashing     ?
-?                      ?  ?  SnapshotRepository (JSON) ?
-????????????????????????  ?????????????????????????????
-```
+* Recursive directory analysis
+* Detection of:
 
-Dependency direction always points **inward**. Infrastructure and Web depend on Application; Application depends on Domain. Nothing points outward.
+  * newly added files
+  * modified files
+  * deleted files and directories
+* File version tracking
+* SHA256-based file content comparison
+* JSON snapshot persistence
+* Structured logging
+* Centralized exception handling
+* Responsive MVC UI
+* Unit-tested application services
 
 ---
 
-## Project Structure
+# Technology Stack
 
+* ASP.NET Core MVC
+* .NET 8
+* Bootstrap 5
+* xUnit
+* NSubstitute
+* System.Text.Json
+* SHA256 hashing
+
+---
+
+# Architecture
+
+The solution follows pragmatic Clean Architecture principles.
+
+```text
+Web (MVC/UI)
+    ¡
+Application (business orchestration)
+    ¡
+Domain (entities and business rules)
+    ¡
+Infrastructure (filesystem + persistence)
 ```
+
+Dependency direction always points inward.
+
+---
+
+# Project Structure
+
+```text
 DirectoryMonitor.sln
-?
-??? DirectoryMonitor/                  ? Web (MVC host)
-?   ??? Controllers/HomeController.cs
-?   ??? Middleware/ExceptionHandlingMiddleware.cs
-?   ??? Models/AnalyzeViewModel.cs
-?   ??? Views/Home/Index.cshtml
-?   ??? wwwroot/css/site.css
-?   ??? Program.cs
-?
-??? DirectoryMonitor.Application/      ? Business logic + interfaces
-?   ??? Interfaces/
-?   ?   ??? IDirectoryAnalysisService.cs
-?   ?   ??? IChangeDetectionService.cs
-?   ?   ??? ISnapshotBuilder.cs
-?   ?   ??? IFileScanner.cs
-?   ?   ??? IHashingService.cs
-?   ?   ??? ISnapshotRepository.cs
-?   ??? Models/AnalysisResult.cs
-?   ??? Services/
-?       ??? DirectoryAnalysisService.cs   ? orchestration only
-?       ??? ChangeDetectionService.cs     ? change diffing
-?       ??? SnapshotBuilder.cs            ? snapshot construction
-?
-??? DirectoryMonitor.Domain/           ? Entities and rules only
-?   ??? Entities/
-?       ??? DirectorySnapshot.cs
-?       ??? FileSnapshot.cs
-?
-??? DirectoryMonitor.Infrastructure/   ? File system + JSON persistence
-?   ??? Persistence/SnapshotRepository.cs
-?   ??? Services/FileScanner.cs
-?   ??? Services/HashingService.cs
-?   ??? DependencyInjection.cs
-?
-??? DirectoryMonitor.Tests/            ? xUnit + NSubstitute
-    ??? DirectoryAnalysisServiceTests.cs
-    ??? ChangeDetectionServiceTests.cs
-    ??? SnapshotRepositoryTests.cs
-    ??? HashingServiceTests.cs
+-
++¦¦ DirectoryMonitor/                 # ASP.NET Core MVC host
++¦¦ DirectoryMonitor.Application/     # Business logic and interfaces
++¦¦ DirectoryMonitor.Domain/          # Domain entities
++¦¦ DirectoryMonitor.Infrastructure/  # File system and persistence
+L¦¦ DirectoryMonitor.Tests/           # Unit tests
 ```
 
 ---
 
-## Service Responsibilities
+# Key Design Decisions
 
-| Service | Responsibility |
-|---|---|
-| `DirectoryAnalysisService` | Orchestration only: load ? build ? detect ? save |
-| `SnapshotBuilder` | Scan files, compute hashes, build `DirectorySnapshot` |
-| `ChangeDetectionService` | Diff two snapshots: added / modified / deleted |
-| `FileScanner` | Enumerate files recursively from the filesystem |
-| `HashingService` | Compute SHA256 hash of file content asynchronously |
-| `SnapshotRepository` | Load and save JSON snapshots from/to disk |
+## SHA256-Based Change Detection
+
+File timestamps are not always reliable indicators of content changes.
+
+To ensure accurate detection of modified files, the application compares SHA256 hashes of file contents instead of relying on filesystem timestamps.
 
 ---
 
-## Design Decisions
+## JSON Persistence
 
-### Why SHA256 for content hashing?
-Filesystem `LastWriteTime` is unreliable — it can change without content changes (file copies, touch commands, version control checkouts). SHA256 hashes the actual file **content**, ensuring changes are only reported when bytes differ. It is also collision-resistant and fast enough for directory-sized workloads.
+The assignment explicitly prohibited database usage.
 
-SHA256 is also used to derive **snapshot filenames** from directory paths — turning any arbitrary path into a fixed-length, filesystem-safe hex string with no collision risk.
+Directory snapshots are therefore persisted as JSON files, providing:
 
-### Why JSON persistence instead of a database?
-- **Zero dependencies** — no database engine, connection strings, or migrations
-- **Human-readable** — snapshot files can be inspected and debugged with a text editor
-- **Portable** — snapshots are stored under `App_Data/Snapshots/` inside the app's content root
-- **Appropriate scope** — for an interview project, a database would be overengineering
-
-### Why split `DirectoryAnalysisService` into three services?
-The original service violated the Single Responsibility Principle — it scanned files, hashed them, built snapshots, detected changes, and persisted results all in one method. Splitting into `SnapshotBuilder`, `ChangeDetectionService`, and a thin orchestrator makes each piece independently testable and readable.
-
-### Why no CQRS, MediatR, or AutoMapper?
-This is intentionally **interview-sized** architecture. Adding those patterns would obscure the core logic behind unnecessary indirection. Clean Architecture does not require them — it only requires clear dependency direction and separation of concerns.
+* lightweight local persistence
+* transparency
+* easy debugging
+* simple deployment
 
 ---
 
-## Running the Application
+## ASP.NET Core MVC
+
+The application uses ASP.NET Core MVC rather than a separate SPA frontend and REST API.
+
+This approach keeps the solution:
+
+* simpler
+* easier to maintain
+* faster to develop
+* and more appropriate for the assignment scope
+
+---
+
+# Snapshot Persistence
+
+Snapshots are stored as JSON files.
+
+Snapshot filenames are generated using SHA256 hashes of normalized directory paths in order to:
+
+* avoid invalid filename characters
+* avoid collisions
+* keep persistence platform-safe
+
+---
+
+# Testing
+
+The solution includes unit tests for:
+
+* change detection
+* snapshot persistence
+* hashing services
+* and analysis orchestration
+
+Testing stack:
+
+* xUnit
+* NSubstitute
+
+---
+
+# Running The Application
+
+## Requirements
+
+* .NET 8 SDK
+
+---
+
+## Run
 
 ```bash
-git clone <repo-url>
-cd DirectoryMonitor
+dotnet restore
+dotnet build
 dotnet run --project DirectoryMonitor
 ```
 
-Open `https://localhost:<port>` in a browser, enter a local directory path, and click **Analyze**.
+---
+
+# Example Workflow
+
+1. Enter a local directory path
+2. Click Analyze
+3. The application scans the directory recursively
+4. Existing snapshots are loaded if available
+5. File changes are detected
+6. Results are displayed in the UI
+7. Updated snapshots are persisted
 
 ---
 
-## Running the Tests
+# Design Goals
 
-```bash
-dotnet test
-```
+This project intentionally prioritizes:
 
-Tests cover:
-- Change detection (added, modified, deleted, unchanged, mixed, nested, case-insensitive paths)
-- Snapshot persistence (save, overwrite, corrupt JSON, separate files per directory)
-- SHA256 hashing (same content, different content, missing file)
-- Orchestration (validation, snapshot lifecycle, error paths)
+* readability
+* maintainability
+* pragmatic architecture
+* clean separation of concerns
+* and production-oriented backend practices
 
----
-
-## Limitations
-
-- **No authentication** — any user with access to the app can scan any directory the process can read
-- **Single-user** — no concurrency control on snapshot files; simultaneous analysis of the same directory may cause a write conflict
-- **Local directories only** — network shares and UNC paths are untested
-- **No snapshot history** — only the latest snapshot per directory is retained; previous states are overwritten
-- **No background watching** — analysis is manual (triggered by button click); there is no filesystem watcher
-
----
-
-## Screenshots
-
-> Run the application and navigate to the home page to see the dashboard UI with summary cards, collapsible file groups, and dark mode support.
-
----
-
-*This project is intentionally interview-sized. It demonstrates Clean Architecture, dependency injection, async I/O, structured logging, and testable design without overengineering.*
+while avoiding unnecessary architectural complexity.

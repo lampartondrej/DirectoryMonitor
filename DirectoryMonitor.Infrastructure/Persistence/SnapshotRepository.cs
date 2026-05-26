@@ -24,19 +24,18 @@ public class SnapshotRepository : ISnapshotRepository
         var filePath = GetSnapshotFilePath(directoryPath);
 
         if (!File.Exists(filePath))
-        {
-            _logger.LogDebug("No existing snapshot for: {DirectoryPath}", directoryPath);
             return null;
-        }
 
         try
         {
             await using var stream = File.OpenRead(filePath);
-            return await JsonSerializer.DeserializeAsync<DirectorySnapshot>(stream, JsonOptions, cancellationToken);
+            var snapshot = await JsonSerializer.DeserializeAsync<DirectorySnapshot>(stream, JsonOptions, cancellationToken);
+            _logger.LogDebug("Snapshot loaded: {FileCount} file(s) for {DirectoryPath}", snapshot?.Files.Count ?? 0, directoryPath);
+            return snapshot;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load snapshot from {FilePath}", filePath);
+            _logger.LogError(ex, "Failed to deserialize snapshot for {DirectoryPath} — treating as no prior snapshot", directoryPath);
             return null;
         }
     }
@@ -49,17 +48,18 @@ public class SnapshotRepository : ISnapshotRepository
         {
             await using var stream = File.Create(filePath);
             await JsonSerializer.SerializeAsync(stream, snapshot, JsonOptions, cancellationToken);
-            _logger.LogDebug("Snapshot saved to {FilePath}", filePath);
+            _logger.LogDebug("Snapshot saved: {FileCount} file(s) for {DirectoryPath}", snapshot.Files.Count, snapshot.DirectoryPath);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save snapshot to {FilePath}", filePath);
+            _logger.LogError(ex, "Failed to save snapshot for {DirectoryPath}", snapshot.DirectoryPath);
             throw;
         }
     }
 
     /// <summary>
-    /// Converts a directory path into a stable, filesystem-safe filename using its SHA256 hash.
+    /// Derives a stable, filesystem-safe filename from a directory path using SHA256.
+    /// Normalises casing so the same logical path always maps to the same file.
     /// </summary>
     private string GetSnapshotFilePath(string directoryPath)
     {
@@ -70,3 +70,4 @@ public class SnapshotRepository : ISnapshotRepository
         return Path.Combine(_storageDirectory, $"{key}.json");
     }
 }
+

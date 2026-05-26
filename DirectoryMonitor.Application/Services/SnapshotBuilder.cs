@@ -27,14 +27,14 @@ public class SnapshotBuilder : ISnapshotBuilder
             ?? [];
 
         var scannedFiles = _fileScanner.ScanFiles(directoryPath).ToList();
-        _logger.LogInformation("Found {FileCount} file(s) in {DirectoryPath}", scannedFiles.Count, directoryPath);
+        _logger.LogDebug("Scanned {FileCount} file(s) in {DirectoryPath}", scannedFiles.Count, directoryPath);
 
         var snapshot = new DirectorySnapshot
         {
-            DirectoryPath = directoryPath,
-            CreatedAt = previousSnapshot?.CreatedAt ?? DateTime.UtcNow,
+            DirectoryPath  = directoryPath,
+            CreatedAt      = previousSnapshot?.CreatedAt ?? DateTime.UtcNow,
             LastAnalyzedAt = DateTime.UtcNow,
-            Files = []
+            Files          = []
         };
 
         foreach (var absolutePath in scannedFiles)
@@ -50,7 +50,7 @@ public class SnapshotBuilder : ISnapshotBuilder
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not hash file {FilePath}, skipping.", absolutePath);
+                _logger.LogWarning(ex, "Skipping file — could not compute hash: {FilePath}", absolutePath);
                 continue;
             }
 
@@ -61,8 +61,8 @@ public class SnapshotBuilder : ISnapshotBuilder
             snapshot.Files.Add(new FileSnapshot
             {
                 RelativePath = relativePath,
-                Hash = hash,
-                Version = version,
+                Hash         = hash,
+                Version      = version,
                 LastModified = DateTime.UtcNow
             });
         }
