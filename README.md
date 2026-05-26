@@ -26,7 +26,6 @@ The project was created as a technical interview assignment with focus on:
 * Structured logging
 * Centralized exception handling
 * Responsive MVC UI
-* Dark / Light mode support
 * Unit-tested application services
 
 ---
@@ -49,11 +48,11 @@ The solution follows pragmatic Clean Architecture principles.
 
 ```text
 Web (MVC/UI)
-    ¡
+    Â¡
 Application (business orchestration)
-    ¡
+    Â¡
 Domain (entities and business rules)
-    ¡
+    Â¡
 Infrastructure (filesystem + persistence)
 ```
 
@@ -66,11 +65,11 @@ Dependency direction always points inward.
 ```text
 DirectoryMonitor.sln
 -
-+¦¦ DirectoryMonitor/                 # ASP.NET Core MVC host
-+¦¦ DirectoryMonitor.Application/     # Business logic and interfaces
-+¦¦ DirectoryMonitor.Domain/          # Domain entities
-+¦¦ DirectoryMonitor.Infrastructure/  # File system and persistence
-L¦¦ DirectoryMonitor.Tests/           # Unit tests
++Â¦Â¦ DirectoryMonitor/                 # ASP.NET Core MVC host
++Â¦Â¦ DirectoryMonitor.Application/     # Business logic and interfaces
++Â¦Â¦ DirectoryMonitor.Domain/          # Domain entities
++Â¦Â¦ DirectoryMonitor.Infrastructure/  # File system and persistence
+LÂ¦Â¦ DirectoryMonitor.Tests/           # Unit tests
 ```
 
 ---
