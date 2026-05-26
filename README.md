@@ -8,7 +8,7 @@ The project was created as a technical interview assignment with focus on:
 * separation of concerns
 * maintainability
 * testability
-* and pragmatic backend-oriented design
+* pragmatic backend-oriented design
 
 ---
 
@@ -26,6 +26,7 @@ The project was created as a technical interview assignment with focus on:
 * Structured logging
 * Centralized exception handling
 * Responsive MVC UI
+* Dark / Light mode support
 * Unit-tested application services
 
 ---
@@ -99,7 +100,7 @@ Directory snapshots are therefore persisted as JSON files, providing:
 
 ## ASP.NET Core MVC
 
-The application uses ASP.NET Core MVC rather than a separate SPA frontend and REST API.
+The application uses ASP.NET Core MVC instead of a separate SPA frontend and REST API.
 
 This approach keeps the solution:
 
@@ -129,12 +130,60 @@ The solution includes unit tests for:
 * change detection
 * snapshot persistence
 * hashing services
-* and analysis orchestration
+* analysis orchestration
 
 Testing stack:
 
 * xUnit
 * NSubstitute
+
+---
+
+# Screenshots
+
+## Dark / Light Mode
+
+![Dark Light Mode](root/screenshots/dark-light-mode.png)
+
+---
+
+## Error Handling
+
+The application validates directory paths and displays user-friendly validation messages.
+
+![Error State](root/screenshots/error-state.png)
+
+---
+
+## No Changes Detected
+
+If no file-level changes are detected, the application displays a clean success state.
+
+![No Changes](root/screenshots/no-changes.png)
+
+---
+
+## Added Files Detection
+
+Newly detected files are grouped and versioned automatically.
+
+![Added Files](root/screenshots/added-files.png)
+
+---
+
+## Modified Files Detection
+
+Modified files are detected using SHA256 content hashing and automatically versioned.
+
+![Modified Files](root/screenshots/modified-files.png)
+
+---
+
+## Deleted Files Detection
+
+Removed files and directories are tracked and displayed separately.
+
+![Deleted Files](root/screenshots/deleted-files.png)
 
 ---
 
@@ -176,6 +225,6 @@ This project intentionally prioritizes:
 * maintainability
 * pragmatic architecture
 * clean separation of concerns
-* and production-oriented backend practices
+* production-oriented backend practices
 
 while avoiding unnecessary architectural complexity.
