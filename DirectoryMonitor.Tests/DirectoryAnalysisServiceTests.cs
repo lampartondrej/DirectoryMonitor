@@ -4,7 +4,6 @@ using DirectoryMonitor.Application.Services;
 using DirectoryMonitor.Domain.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 
 namespace DirectoryMonitor.Tests;
 
@@ -49,12 +48,11 @@ public class DirectoryAnalysisServiceTests
     [Fact]
     public async Task AnalyzeAsync_NoChanges_ReturnsEmptyChangeList()
     {
-        var previousSnapshot = SnapshotWith("file.txt", "hash1", version: 1);
-        var currentSnapshot  = SnapshotWith("file.txt", "hash1", version: 1);
+        var snapshot = SnapshotWith("file.txt", "hash1", version: 1);
 
-        _snapshotRepository.LoadAsync(_testDir, default).Returns(previousSnapshot);
-        _snapshotBuilder.BuildAsync(_testDir, previousSnapshot, default).Returns(currentSnapshot);
-        _changeDetection.DetectChanges(previousSnapshot, currentSnapshot).Returns([]);
+        _snapshotRepository.LoadAsync(_testDir, default).Returns(snapshot);
+        _snapshotBuilder.BuildAsync(_testDir, snapshot, default).Returns(snapshot);
+        _changeDetection.DetectChanges(snapshot, snapshot).Returns([]);
 
         var result = await _sut.AnalyzeAsync(_testDir);
 
@@ -63,17 +61,94 @@ public class DirectoryAnalysisServiceTests
     }
 
     [Fact]
-    public async Task AnalyzeAsync_SavesSnapshotAfterAnalysis()
+    public async Task AnalyzeAsync_EmptyDirectory_ReturnsZeroFilesScanned()
     {
-        var currentSnapshot = SnapshotWith("file.txt", "hash1", version: 1);
+        var emptySnapshot = new DirectorySnapshot { DirectoryPath = _testDir, Files = [] };
 
         _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
-        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(currentSnapshot);
-        _changeDetection.DetectChanges(null, currentSnapshot).Returns([]);
+        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(emptySnapshot);
+        _changeDetection.DetectChanges(null, emptySnapshot).Returns([]);
+
+        var result = await _sut.AnalyzeAsync(_testDir);
+
+        Assert.Equal(0, result.TotalFilesScanned);
+        Assert.False(result.HasChanges);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_ReportsTotalFilesScanned()
+    {
+        var snapshot = new DirectorySnapshot
+        {
+            DirectoryPath = _testDir,
+            Files =
+            [
+                new FileSnapshot { RelativePath = "a.txt", Hash = "h1", Version = 1 },
+                new FileSnapshot { RelativePath = "b.txt", Hash = "h2", Version = 1 }
+            ]
+        };
+
+        _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
+        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(snapshot);
+        _changeDetection.DetectChanges(null, snapshot).Returns([]);
+
+        var result = await _sut.AnalyzeAsync(_testDir);
+
+        Assert.Equal(2, result.TotalFilesScanned);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_NestedDirectoryFiles_AreIncluded()
+    {
+        var snapshot = new DirectorySnapshot
+        {
+            DirectoryPath = _testDir,
+            Files =
+            [
+                new FileSnapshot { RelativePath = @"src\core\Program.cs", Hash = "h1", Version = 1 },
+                new FileSnapshot { RelativePath = @"src\tests\UnitTest.cs", Hash = "h2", Version = 1 }
+            ]
+        };
+        var changes = snapshot.Files
+            .Select(f => new FileChange { RelativePath = f.RelativePath, ChangeType = ChangeType.Added, Version = 1 })
+            .ToList();
+
+        _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
+        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(snapshot);
+        _changeDetection.DetectChanges(null, snapshot).Returns(changes);
+
+        var result = await _sut.AnalyzeAsync(_testDir);
+
+        Assert.Equal(2, result.Changes.Count);
+        Assert.All(result.Changes, c => Assert.Equal(ChangeType.Added, c.ChangeType));
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_SavesSnapshotAfterAnalysis()
+    {
+        var snapshot = SnapshotWith("file.txt", "hash1", version: 1);
+
+        _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
+        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(snapshot);
+        _changeDetection.DetectChanges(null, snapshot).Returns([]);
 
         await _sut.AnalyzeAsync(_testDir);
 
-        await _snapshotRepository.Received(1).SaveAsync(currentSnapshot, default);
+        await _snapshotRepository.Received(1).SaveAsync(snapshot, default);
+    }
+
+    [Fact]
+    public async Task AnalyzeAsync_ReturnsCorrectDirectoryPath()
+    {
+        var snapshot = SnapshotWith("a.txt", "hash", version: 1);
+
+        _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
+        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(snapshot);
+        _changeDetection.DetectChanges(null, snapshot).Returns([]);
+
+        var result = await _sut.AnalyzeAsync(_testDir);
+
+        Assert.Equal(_testDir, result.DirectoryPath);
     }
 
     [Fact]
@@ -97,19 +172,6 @@ public class DirectoryAnalysisServiceTests
             () => _sut.AnalyzeAsync("C:\\bad\0path"));
     }
 
-    [Fact]
-    public async Task AnalyzeAsync_ReturnsCorrectDirectoryPath()
-    {
-        var currentSnapshot = SnapshotWith("a.txt", "hash", version: 1);
-        _snapshotRepository.LoadAsync(_testDir, default).Returns((DirectorySnapshot?)null);
-        _snapshotBuilder.BuildAsync(_testDir, null, default).Returns(currentSnapshot);
-        _changeDetection.DetectChanges(null, currentSnapshot).Returns([]);
-
-        var result = await _sut.AnalyzeAsync(_testDir);
-
-        Assert.Equal(_testDir, result.DirectoryPath);
-    }
-
     // Helper
     private static DirectorySnapshot SnapshotWith(string relativePath, string hash, int version) => new()
     {
@@ -117,4 +179,5 @@ public class DirectoryAnalysisServiceTests
         Files = [new FileSnapshot { RelativePath = relativePath, Hash = hash, Version = version }]
     };
 }
+
 

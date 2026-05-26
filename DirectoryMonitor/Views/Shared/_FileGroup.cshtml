@@ -1,0 +1,42 @@
+@model DirectoryMonitor.Models.FileGroupViewModel
+
+<div class="dm-change-group">
+    <div class="dm-group-header @Model.HeaderClass"
+         data-bs-toggle="collapse" data-bs-target="#@Model.GroupId"
+         aria-expanded="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="@Model.IconPath" />
+        </svg>
+        @Model.Title
+        <span class="dm-group-count">@Model.Files.Count</span>
+        <svg class="dm-group-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+    </div>
+    <div id="@Model.GroupId" class="collapse show">
+        <div class="dm-file-list">
+            @if (!Model.Files.Any())
+            {
+                <div class="dm-empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                    </svg>
+                    <span>No files in this group.</span>
+                </div>
+            }
+            else
+            {
+                @foreach (var file in Model.Files.OrderBy(f => f.RelativePath))
+                {
+                    <div class="dm-file-item">
+                        <svg class="dm-file-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="@Model.FileIconPath" />
+                        </svg>
+                        <span class="dm-file-path" title="@file.RelativePath">@file.RelativePath</span>
+                        <span class="dm-file-version">v@(file.Version)</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

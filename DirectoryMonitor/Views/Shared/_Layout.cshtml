@@ -6,6 +6,14 @@
     <title>@ViewData["Title"] — Directory Monitor</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        html.dm-dark .dm-analyze-btn {
+            filter: brightness(0.62) !important;
+        }
+        html.dm-dark .dm-analyze-btn:hover {
+            filter: brightness(0.72) !important;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-md dm-navbar">
@@ -45,20 +53,22 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-    // Dark-mode toggle — lives in the layout so it works on every page.
-    // Reads localStorage first, then falls back to the OS preference.
+    // Dark-mode toggle. Uses class "dm-dark" on <html> — fully self-contained,
+    // no dependency on Bootstrap 5.3+ data-bs-theme. Persists to localStorage
+    // and respects the OS prefers-color-scheme on first visit.
     (function () {
-        var html    = document.documentElement;
-        var toggle  = document.getElementById('themeToggle');
+        var html     = document.documentElement;
+        var toggle   = document.getElementById('themeToggle');
         var iconMoon = document.getElementById('iconMoon');
         var iconSun  = document.getElementById('iconSun');
 
         function applyTheme(theme) {
-            html.setAttribute('data-bs-theme', theme);
             if (theme === 'dark') {
+                html.classList.add('dm-dark');
                 iconMoon.style.display = 'none';
                 iconSun.style.display  = '';
             } else {
+                html.classList.remove('dm-dark');
                 iconMoon.style.display = '';
                 iconSun.style.display  = 'none';
             }
@@ -69,7 +79,7 @@
         applyTheme(saved);
 
         toggle.addEventListener('click', function () {
-            var next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+            var next = html.classList.contains('dm-dark') ? 'light' : 'dark';
             localStorage.setItem('dm-theme', next);
             applyTheme(next);
         });

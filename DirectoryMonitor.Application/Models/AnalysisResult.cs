@@ -4,6 +4,7 @@ public class AnalysisResult
 {
     public string DirectoryPath { get; set; } = string.Empty;
     public DateTime AnalyzedAt { get; set; }
+    public int TotalFilesScanned { get; set; }
     public List<FileChange> Changes { get; set; } = [];
 
     public bool HasChanges => Changes.Count > 0;
@@ -25,4 +26,5 @@ public enum ChangeType
     Modified,
     Deleted
 }
+
 

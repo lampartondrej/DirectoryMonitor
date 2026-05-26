@@ -6,34 +6,33 @@
     var added    = Model.Result?.AddedFiles.ToList()    ?? [];
     var modified = Model.Result?.ModifiedFiles.ToList() ?? [];
     var deleted  = Model.Result?.DeletedFiles.ToList()  ?? [];
+    var isFirstScan = Model.Result is not null && !Model.Result.HasChanges
+                      && Model.Result.TotalFilesScanned > 0
+                      && added.Count == 0 && modified.Count == 0 && deleted.Count == 0;
 }
-
-@* ?? SVG icon helpers ???????????????????????????????????????????????????? *@
-@* Using inline SVGs avoids all emoji encoding / font-support issues.       *@
 
 @* Page header *@
 <div class="dm-page-header">
     <h1 class="dm-page-title">Directory Monitor</h1>
-    <p class="dm-page-subtitle">Analyze local directories and detect file changes in real time.</p>
+    <p class="dm-page-subtitle">Analyze a local directory and track file-level changes over time.</p>
 </div>
 
 @* Input card *@
 <div class="dm-input-card">
-    <form method="post" asp-action="Analyze" id="analyzeForm">
+    <form method="post" asp-action="Analyze" id="analyzeForm" novalidate>
         @Html.AntiForgeryToken()
         <div class="row g-3 align-items-end">
             <div class="col">
                 <label asp-for="DirectoryPath" class="form-label fw-semibold mb-1">Directory Path</label>
                 <input asp-for="DirectoryPath"
                        class="form-control dm-path-input"
-                       placeholder="e.g. C:\Projects\MyFolder  or  /home/user/projects"
+                       placeholder="e.g. C:\Projects\MyApp  or  /home/user/projects"
                        autocomplete="off"
                        spellcheck="false" />
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-primary dm-analyze-btn" id="analyzeBtn">
-                    @* Search / magnifier icon *@
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="me-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="me-1 mb-1">
                         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.156a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
                     </svg>
                     <span class="dm-btn-text">Analyze</span>
@@ -44,51 +43,59 @@
     </form>
 </div>
 
-@* Validation / error *@
+@* Error alert *@
 @if (Model.ErrorMessage is not null)
 {
-    <div class="alert alert-danger dm-error" role="alert">
-        <strong>Error:</strong> @Model.ErrorMessage
+    <div class="dm-alert dm-alert--error" role="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="flex-shrink-0">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </svg>
+        <span>@Model.ErrorMessage</span>
     </div>
 }
 
+@* Results *@
 @if (Model.Result is not null)
 {
-    @* Result meta bar *@
+    @* Meta bar *@
     <div class="dm-result-meta">
-        @* Folder icon *@
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="flex-shrink-0">
             <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31z"/>
         </svg>
-        <strong class="font-monospace">@Model.Result.DirectoryPath</strong>
-        <span class="ms-auto d-flex align-items-center gap-1">
-            @* Clock icon *@
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+        <span class="dm-result-meta__path">@Model.Result.DirectoryPath</span>
+        <span class="dm-result-meta__pill">@Model.Result.TotalFilesScanned file(s) scanned</span>
+        <span class="ms-auto dm-result-meta__timestamp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                 <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
             </svg>
-            Analyzed at <strong>@Model.Result.AnalyzedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</strong>
+            @Model.Result.AnalyzedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
         </span>
     </div>
 
     @if (!Model.Result.HasChanges)
     {
-        <div class="dm-no-changes">
-            @* Check-circle icon *@
+        @* No-changes / first-scan banner *@
+        <div class="dm-banner dm-banner--success">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="flex-shrink-0">
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                 <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
             </svg>
-            <span>No changes detected since the last snapshot. The directory is up to date.</span>
+            @if (Model.Result.TotalFilesScanned == 0)
+            {
+                <span>The directory is empty — no files were found to track.</span>
+            }
+            else
+            {
+                <span>No changes detected. All @Model.Result.TotalFilesScanned file(s) match the last snapshot.</span>
+            }
         </div>
     }
     else
     {
         @* Summary cards *@
         <div class="dm-summary-grid">
-
             <div class="dm-summary-card dm-summary-card--added">
-                @* Plus-circle icon *@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="dm-summary-icon">
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -98,9 +105,7 @@
                     <div class="dm-summary-label">Added</div>
                 </div>
             </div>
-
             <div class="dm-summary-card dm-summary-card--modified">
-                @* Pencil icon *@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="dm-summary-icon">
                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                 </svg>
@@ -109,9 +114,7 @@
                     <div class="dm-summary-label">Modified</div>
                 </div>
             </div>
-
             <div class="dm-summary-card dm-summary-card--deleted">
-                @* Trash icon *@
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="dm-summary-icon">
                     <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
                     <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
@@ -121,115 +124,48 @@
                     <div class="dm-summary-label">Deleted</div>
                 </div>
             </div>
-
         </div>
 
-        @* Added files *@
+        @* Added files group *@
         @if (added.Count > 0)
         {
-            <div class="dm-change-group">
-                <div class="dm-group-header dm-group-header--added"
-                     data-bs-toggle="collapse" data-bs-target="#group-added"
-                     aria-expanded="true">
-                    @* Plus icon *@
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg>
-                    Added Files
-                    <span class="dm-group-count">@added.Count</span>
-                    <svg class="dm-group-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                </div>
-                <div id="group-added" class="collapse show">
-                    <div class="dm-file-list">
-                        @foreach (var file in added.OrderBy(f => f.RelativePath))
-                        {
-                            <div class="dm-file-item">
-                                @* File-earmark icon *@
-                                <svg class="dm-file-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                    <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
-                                </svg>
-                                <span class="dm-file-path" title="@file.RelativePath">@file.RelativePath</span>
-                                <span class="dm-file-version">v@file.Version</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_FileGroup", new DirectoryMonitor.Models.FileGroupViewModel
+            {
+                GroupId      = "group-added",
+                Title        = "Added Files",
+                HeaderClass  = "dm-group-header--added",
+                Files        = added,
+                IconPath     = "M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z",
+                FileIconPath = "M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"
+            })
         }
 
-        @* Modified files *@
+        @* Modified files group *@
         @if (modified.Count > 0)
         {
-            <div class="dm-change-group">
-                <div class="dm-group-header dm-group-header--modified"
-                     data-bs-toggle="collapse" data-bs-target="#group-modified"
-                     aria-expanded="true">
-                    @* Pencil icon *@
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                    </svg>
-                    Modified Files
-                    <span class="dm-group-count">@modified.Count</span>
-                    <svg class="dm-group-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                </div>
-                <div id="group-modified" class="collapse show">
-                    <div class="dm-file-list">
-                        @foreach (var file in modified.OrderBy(f => f.RelativePath))
-                        {
-                            <div class="dm-file-item">
-                                @* File-earmark-diff icon *@
-                                <svg class="dm-file-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                    <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
-                                    <path d="M8 6a.5.5 0 0 1 .5.5v1.793l.646-.647a.5.5 0 1 1 .708.708L8 10.207 6.146 8.354a.5.5 0 1 1 .708-.708l.646.647V6.5A.5.5 0 0 1 8 6zm-2.5 5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5z"/>
-                                </svg>
-                                <span class="dm-file-path" title="@file.RelativePath">@file.RelativePath</span>
-                                <span class="dm-file-version">v@file.Version</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_FileGroup", new DirectoryMonitor.Models.FileGroupViewModel
+            {
+                GroupId      = "group-modified",
+                Title        = "Modified Files",
+                HeaderClass  = "dm-group-header--modified",
+                Files        = modified,
+                IconPath     = "M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z",
+                FileIconPath = "M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2zM8 6a.5.5 0 0 1 .5.5v1.793l.646-.647a.5.5 0 1 1 .708.708L8 10.207 6.146 8.354a.5.5 0 1 1 .708-.708l.646.647V6.5A.5.5 0 0 1 8 6zm-2.5 5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5z"
+            })
         }
 
-        @* Deleted files *@
+        @* Deleted files group *@
         @if (deleted.Count > 0)
         {
-            <div class="dm-change-group">
-                <div class="dm-group-header dm-group-header--deleted"
-                     data-bs-toggle="collapse" data-bs-target="#group-deleted"
-                     aria-expanded="true">
-                    @* Trash icon *@
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                    </svg>
-                    Deleted Files
-                    <span class="dm-group-count">@deleted.Count</span>
-                    <svg class="dm-group-chevron" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                </div>
-                <div id="group-deleted" class="collapse show">
-                    <div class="dm-file-list">
-                        @foreach (var file in deleted.OrderBy(f => f.RelativePath))
-                        {
-                            <div class="dm-file-item">
-                                @* File-earmark-x icon *@
-                                <svg class="dm-file-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                                    <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
-                                    <path d="M6.146 7.146a.5.5 0 0 1 .708 0L8 8.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 9l1.147 1.146a.5.5 0 0 1-.708.708L8 9.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 9 6.146 7.854a.5.5 0 0 1 0-.708z"/>
-                                </svg>
-                                <span class="dm-file-path" title="@file.RelativePath">@file.RelativePath</span>
-                                <span class="dm-file-version">v@file.Version</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_FileGroup", new DirectoryMonitor.Models.FileGroupViewModel
+            {
+                GroupId      = "group-deleted",
+                Title        = "Deleted Files",
+                HeaderClass  = "dm-group-header--deleted",
+                Files        = deleted,
+                IconPath     = "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6zM14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z",
+                FileIconPath = "M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2zM6.146 7.146a.5.5 0 0 1 .708 0L8 8.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 9l1.147 1.146a.5.5 0 0 1-.708.708L8 9.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 9 6.146 7.854a.5.5 0 0 1 0-.708z"
+            })
         }
     }
 }
@@ -237,7 +173,7 @@
 @section Scripts {
 <script>
 (function () {
-    // Loading spinner on form submit
+    // Show spinner and disable button on submit
     document.getElementById('analyzeForm').addEventListener('submit', function () {
         var btn = document.getElementById('analyzeBtn');
         btn.disabled = true;
@@ -245,7 +181,7 @@
         btn.querySelector('.dm-spinner').style.display = 'inline-block';
     });
 
-    // Keep chevron arrows in sync with Bootstrap collapse state
+    // Sync chevron rotation with Bootstrap collapse events
     document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (header) {
         var target = document.querySelector(header.dataset.bsTarget);
         if (!target) return;
@@ -255,4 +191,5 @@
 }());
 </script>
 }
+
 

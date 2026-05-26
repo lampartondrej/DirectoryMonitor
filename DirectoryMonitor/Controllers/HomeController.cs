@@ -26,6 +26,7 @@ public class HomeController : Controller
         var validationError = ValidateInput(model.DirectoryPath);
         if (validationError is not null)
         {
+            _logger.LogWarning("Invalid directory input: {Reason} — value: {Input}", validationError, model.DirectoryPath);
             model.ErrorMessage = validationError;
             return View("Index", model);
         }
@@ -36,19 +37,23 @@ public class HomeController : Controller
         }
         catch (DirectoryNotFoundException)
         {
-            model.ErrorMessage = $"Directory not found: \"{model.DirectoryPath}\". Please check the path and try again.";
+            model.ErrorMessage = $"Directory not found: \"{model.DirectoryPath}\". Please verify the path exists and try again.";
         }
         catch (UnauthorizedAccessException)
         {
-            model.ErrorMessage = $"Access denied to \"{model.DirectoryPath}\". The application does not have permission to read this directory.";
+            model.ErrorMessage = $"Access denied: \"{model.DirectoryPath}\". The application does not have permission to read this directory.";
         }
         catch (ArgumentException ex)
         {
             model.ErrorMessage = ex.Message;
         }
+        catch (OperationCanceledException)
+        {
+            model.ErrorMessage = "The analysis was cancelled.";
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error during analysis of {DirectoryPath}", model.DirectoryPath);
+            _logger.LogError(ex, "Unexpected error analysing {DirectoryPath}", model.DirectoryPath);
             model.ErrorMessage = "An unexpected error occurred. Please check the application logs.";
         }
 
@@ -70,4 +75,5 @@ public class HomeController : Controller
         return null;
     }
 }
+
 
