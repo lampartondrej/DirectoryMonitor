@@ -500,57 +500,7 @@ html.dm-dark .dm-group-count {
     transform: rotate(-90deg);
 }
 
-.dm-file-list {
-    border: 1px solid var(--bs-border-color);
-    border-top: none;
-    border-radius: 0 0 var(--dm-radius) var(--dm-radius);
-    overflow: hidden;
-}
 
-.dm-file-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 1rem;
-    font-size: 0.875rem;
-    border-bottom: 1px solid var(--bs-border-color);
-    background-color: var(--bs-body-bg);
-    transition: background-color var(--dm-transition);
-}
-
-.dm-file-item:last-child {
-    border-bottom: none;
-}
-
-.dm-file-item:hover {
-    background-color: var(--bs-secondary-bg);
-}
-
-.dm-file-icon {
-    flex-shrink: 0;
-    opacity: 0.6;
-}
-
-.dm-file-path {
-    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 0.82rem;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: var(--bs-body-color);
-}
-
-.dm-file-version {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    background-color: var(--bs-secondary-bg);
-    color: var(--bs-secondary-color);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
 
 /* ---------- No-changes banner ---------- */
 .dm-no-changes {
