@@ -143,7 +143,7 @@ Testing stack:
 
 ## Dark / Light Mode
 
-![Dark Light Mode](screenshots/dark-light-mode.png)
+![Dark Light Mode](Screenshots/dark-light-mode.png)
 
 ---
 
@@ -151,7 +151,7 @@ Testing stack:
 
 The application validates directory paths and displays user-friendly validation messages.
 
-![Error State](screenshots/error-state.png)
+![Error State](Screenshots/error-state.png)
 
 ---
 
@@ -159,7 +159,7 @@ The application validates directory paths and displays user-friendly validation 
 
 If no file-level changes are detected, the application displays a clean success state.
 
-![No Changes](screenshots/no-changes.png)
+![No Changes](Screenshots/no-changes.png)
 
 ---
 
@@ -167,7 +167,7 @@ If no file-level changes are detected, the application displays a clean success 
 
 Newly detected files are grouped and versioned automatically.
 
-![Added Files](screenshots/added-files.png)
+![Added Files](Screenshots/added-files.png)
 
 ---
 
@@ -175,7 +175,7 @@ Newly detected files are grouped and versioned automatically.
 
 Modified files are detected using SHA256 content hashing and automatically versioned.
 
-![Modified Files](screenshots/modified-files.png)
+![Modified Files](Screenshots/modified-files.png)
 
 ---
 
@@ -183,7 +183,7 @@ Modified files are detected using SHA256 content hashing and automatically versi
 
 Removed files and directories are tracked and displayed separately.
 
-![Deleted Files](screenshots/deleted-files.png)
+![Deleted Files](Screenshots/deleted-files.png)
 
 ---
 
