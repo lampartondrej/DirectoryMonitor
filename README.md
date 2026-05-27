@@ -122,12 +122,6 @@ Testing stack:
 
 # Screenshots
 
-## Dark / Light Mode
-
-![Dark Light Mode](Screenshots/dark-light-mode.png)
-
----
-
 ## Error Handling
 
 The application validates directory paths and displays user-friendly validation messages.
@@ -165,6 +159,12 @@ Modified files are detected using SHA256 content hashing and automatically versi
 Removed files and directories are tracked and displayed separately.
 
 ![Deleted Files](Screenshots/deleted-files.png)
+
+---
+
+## Dark / Light Mode
+
+![Dark Light Mode](Screenshots/dark-light-mode.png)
 
 ---
 
