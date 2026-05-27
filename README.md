@@ -26,7 +26,6 @@ The project was created as a technical interview assignment with focus on:
 * Structured logging
 * Centralized exception handling
 * Responsive MVC UI
-* Dark / Light mode support
 * Unit-tested application services
 
 ---
@@ -49,11 +48,11 @@ The solution follows pragmatic Clean Architecture principles.
 
 ```text
 Web (MVC/UI)
-    ¡
+    Â¡
 Application (business orchestration)
-    ¡
+    Â¡
 Domain (entities and business rules)
-    ¡
+    Â¡
 Infrastructure (filesystem + persistence)
 ```
 
@@ -66,11 +65,11 @@ Dependency direction always points inward.
 ```text
 DirectoryMonitor.sln
 -
-+¦¦ DirectoryMonitor/                 # ASP.NET Core MVC host
-+¦¦ DirectoryMonitor.Application/     # Business logic and interfaces
-+¦¦ DirectoryMonitor.Domain/          # Domain entities
-+¦¦ DirectoryMonitor.Infrastructure/  # File system and persistence
-L¦¦ DirectoryMonitor.Tests/           # Unit tests
++Â¦Â¦ DirectoryMonitor/                 # ASP.NET Core MVC host
++Â¦Â¦ DirectoryMonitor.Application/     # Business logic and interfaces
++Â¦Â¦ DirectoryMonitor.Domain/          # Domain entities
++Â¦Â¦ DirectoryMonitor.Infrastructure/  # File system and persistence
+LÂ¦Â¦ DirectoryMonitor.Tests/           # Unit tests
 ```
 
 ---
@@ -79,21 +78,16 @@ L¦¦ DirectoryMonitor.Tests/           # Unit tests
 
 ## SHA256-Based Change Detection
 
-File timestamps are not always reliable indicators of content changes.
-
 To ensure accurate detection of modified files, the application compares SHA256 hashes of file contents instead of relying on filesystem timestamps.
 
 ---
 
 ## JSON Persistence
 
-The assignment explicitly prohibited database usage.
+Directory snapshots are persisted as JSON files, providing:
 
-Directory snapshots are therefore persisted as JSON files, providing:
-
-* lightweight local persistence
-* transparency
-* easy debugging
+* lightweight
+* transparet
 * simple deployment
 
 ---
@@ -106,20 +100,7 @@ This approach keeps the solution:
 
 * simpler
 * easier to maintain
-* faster to develop
 * and more appropriate for the assignment scope
-
----
-
-# Snapshot Persistence
-
-Snapshots are stored as JSON files.
-
-Snapshot filenames are generated using SHA256 hashes of normalized directory paths in order to:
-
-* avoid invalid filename characters
-* avoid collisions
-* keep persistence platform-safe
 
 ---
 
