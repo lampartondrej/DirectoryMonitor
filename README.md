@@ -78,17 +78,13 @@ L¦¦ DirectoryMonitor.Tests/           # Unit tests
 
 ## SHA256-Based Change Detection
 
-File timestamps are not always reliable indicators of content changes.
-
 To ensure accurate detection of modified files, the application compares SHA256 hashes of file contents instead of relying on filesystem timestamps.
 
 ---
 
 ## JSON Persistence
 
-The assignment explicitly prohibited database usage.
-
-Directory snapshots are therefore persisted as JSON files, providing:
+Directory snapshots are persisted as JSON files, providing:
 
 * lightweight
 * transparet
@@ -105,18 +101,6 @@ This approach keeps the solution:
 * simpler
 * easier to maintain
 * and more appropriate for the assignment scope
-
----
-
-# Snapshot Persistence
-
-Snapshots are stored as JSON files.
-
-Snapshot filenames are generated using SHA256 hashes of normalized directory paths in order to:
-
-* avoid invalid filename characters
-* avoid collisions
-* keep persistence platform-safe
 
 ---
 
