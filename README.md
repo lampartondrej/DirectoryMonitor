@@ -90,9 +90,8 @@ The assignment explicitly prohibited database usage.
 
 Directory snapshots are therefore persisted as JSON files, providing:
 
-* lightweight local persistence
-* transparency
-* easy debugging
+* lightweight
+* transparet
 * simple deployment
 
 ---
@@ -105,7 +104,6 @@ This approach keeps the solution:
 
 * simpler
 * easier to maintain
-* faster to develop
 * and more appropriate for the assignment scope
 
 ---
